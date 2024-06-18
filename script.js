@@ -53,6 +53,8 @@ class ListItem {
  * @public
  */
 class Snake{
+    static ALL_DIRECTION = ['down','up','left','right']
+    static DEFAULT_DIRECTION = 'down'
     /**
      * 
      * @param {Game} game instance of this game
@@ -62,7 +64,7 @@ class Snake{
      * @param {Number} i row index of board
      * @param {Number} j col index of board
      */
-    constructor(game,nodes,length,direction='down',i,j){
+    constructor(game,nodes,length,direction=Snake.DEFAULT_DIRECTION,i,j){
         const [first,last] = ListItem.fromList(nodes)
         this.game = game
         this.head = last //last node is the bottom -> head
@@ -71,7 +73,10 @@ class Snake{
         this.direction = direction
         this.i = i //cur row
         this.j = j 
-        
+        /**
+         * @type {('down'|'up'|'left'|'right')}
+         */
+        this.prevDirection = 'down'
         
         this.head.node.classList.add('head')
     }
@@ -82,6 +87,22 @@ class Snake{
      */
     setDirection(dir){
         this.direction = dir
+    }
+
+
+    oppositeDirection(dir=this.prevDirection){
+        switch(dir){
+            case 'down':
+                return 'up'
+            case 'left':
+                return 'right'
+            case 'right':
+                return 'left';
+            case 'up':
+                return 'down';
+            default:
+                throw new Error('Invalid direction')
+        }
     }
 
     nextCorrd(){
@@ -125,6 +146,7 @@ class Snake{
         this.head.node.classList.add('snake','head')
         this.i = ni
         this.j = nj
+        this.prevDirection = this.direction
     }
     
     stop(){
@@ -328,6 +350,7 @@ class Game {
         this.difficulty = new Difficulty()
         this.record = new PointsRecord()
         this.connectButtons()
+        this.updateDifficulty(this.difficulty.getDifficulty())
         // console.log(this.snake)
     }
     
@@ -358,17 +381,12 @@ class Game {
         /**
          * @type {Snake}
          */
-        this.snake = new Snake(this,snakes,INITIAL_LENGTH,'down',INITIAL_LENGTH-1,0)
+        this.snake = new Snake(this,snakes,INITIAL_LENGTH,this.direction,INITIAL_LENGTH-1,0)
         this.points = 0
-        this.generateFruit(1)
-
-
-        //set up fields
-        const diff = this.difficulty.getDifficulty()
-        this.recorded = this.record.getRecoredPoints(diff)
-        this.fields.difficulty.innerText = capitalize(diff)
+        this.generateFruit(5)
         this.fields.points.innerText = this.points
-        this.fields.record.innerText = this.recorded
+
+
     }
 
     /**
@@ -435,9 +453,12 @@ class Game {
      * 
      * @param {('easy'|'normal'|'hard')} diff 
      */
-   updateDifficulty(diff){
-        this.fields.difficulty.innerText = diff
+    updateDifficulty(diff){
         this.difficulty.setDifficulty(diff)
+        this.fields.difficulty.innerText = capitalize(diff)
+        this.recorded = this.record.getRecoredPoints(diff)
+        this.fields.record.innerText = this.recorded
+
    }
 
     ateFruit(num=1){
@@ -451,10 +472,27 @@ class Game {
      */
     changeDirection(dir){
         const cur = this.direction
+        //fixed:opp to moved direction instead of direction set
+        if(dir === this.snake.oppositeDirection() ){
+            //invalid choice
+            this.buttons[dir].classList.add('invalid')
+            setTimeout(() => {
+                this.buttons[dir].classList.remove('invalid')
+            }, 50);
+            return
+        }
         this.buttons[cur]?.classList.remove('on')
         this.direction = dir
         this.snake.setDirection(dir)
         this.buttons[dir].classList.add('on')
+    }
+
+    unsetDirection(){
+        this.direction = undefined
+        for(let dir of Snake.ALL_DIRECTION){
+            this.buttons[dir]?.classList.remove('on')
+        }
+
     }
 
    
@@ -473,7 +511,6 @@ class Game {
                     this.resume()
                     break
                 case 'end':
-                    this.initGameBoard()
                     this.start()
                     break;
                 default:
@@ -525,14 +562,39 @@ class Game {
         const newDiff = idx <0?Difficulty.defaultDifficulty:
         Difficulty.validDifficulty[(idx+1)%Difficulty.validDifficulty.length]
 
-        //set text
-        this.fields.difficulty.innerText = capitalize(newDiff)
-        this.difficulty.setDifficulty(newDiff)
+        this.updateDifficulty(newDiff)
+    }
+
+
+
+    countDownStart(seconds=3){
+        seconds = seconds >=0 ? seconds : 3
+        // e.g. [1,2,3]
+        const range = Array.from({length:seconds})
+        .map((_,idx)=>idx+1)
+        let interval = undefined
+        const fn = ()=>{
+            const val = range.pop()
+            if(!val){
+                this.changeStartText('Pause')
+                this.snake.run(this.difficulty.getSpeed())
+                clearInterval(interval)
+                return 
+            }
+            //set to the number if have count down
+            this.changeStartText(val)
+        }
+
+        //call and set 1s interval and clean up when val = 0
+        fn()
+        if(range.length){
+            interval = setInterval(fn,1000)
+        }
     }
 
     /**
      * 
-     * @param {('Start'|'Restart'|'Pause'|'Resume')} text 
+     * @param {('Start'|'Restart'|'Pause'|'Resume')|Number} text 
      */
     changeStartText(text){
         this.buttons.start.innerText =text
@@ -551,10 +613,16 @@ class Game {
     }
 
     start(){
-        this.changeDirection('down')
-        this.setStatus('stop')
-        this.changeStartText('Pause')
-       this.snake.run(this.difficulty.getSpeed())
+        if(!this.direction){
+            this.changeDirection(Snake.DEFAULT_DIRECTION)
+        }
+        if(this.restart){
+            // the flag is only on after one game is played
+            this.initGameBoard()
+        }
+        this.setStatus('running')
+        this.countDownStart(3)
+        
     }
 
     /**
@@ -564,8 +632,10 @@ class Game {
     end(reason){
         this.snake.stop()
         this.changeStartText('Restart')
+        this.restart = true
         this.setStatus('end')
         this.checkAndUpdateRecord()
+        this.unsetDirection()
         alert(reason)
     }
 }
@@ -611,7 +681,6 @@ const fields = {
 
 const game = new Game(main,m,n,btns,fields)
 game.initGameBoard()
-
 
 
 
