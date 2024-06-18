@@ -54,7 +54,7 @@ main{
     flex-direction: column;
     justify-content: center;
     align-content: center;
-    
+    /* scale: 50%; */
 }
 
 .dir-btn{
@@ -68,12 +68,16 @@ main{
     background-color: gray;
 }
 
+.dir-btn.invalid{
+    background-color: lightcoral;
+}
+
 .btn-group{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     margin: 30px 0 30px 0;
 }
 
@@ -82,7 +86,7 @@ main{
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap:60px
+    gap:80px
 }
 
 
@@ -110,6 +114,10 @@ main{
 
 .end >div>p> #difficulty{
     cursor: pointer;
+}
+
+.end >div>p> #difficulty:hover{
+    text-decoration: underline;
 }
 
 button {
