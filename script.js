@@ -164,7 +164,7 @@ class Snake {
             } catch (error) {
                 if (error instanceof EndGameError) {
                     this.game.end(error.reason);
-                    return;
+                    return
                 }
                 console.error(error.message)
             }
@@ -617,18 +617,22 @@ class Game {
             // console.log(ev.code)
             switch (ev.code) {
                 case 'ArrowLeft':
+                case 'KeyA':
                     ev.preventDefault()
                     left.click()
                     break;
                 case 'ArrowUp':
+                case 'KeyW':
                     ev.preventDefault()
                     up.click()
                     break;
                 case 'ArrowRight':
+                case 'KeyD':
                     ev.preventDefault()
                     right.click()
                     break;
                 case 'ArrowDown':
+                case 'KeyS':
                     ev.preventDefault()
                     down.click()
                     break;
@@ -785,3 +789,4 @@ const dialog = document.querySelector('dialog')
 
 const game = new Game(main, m, n, btns, fields, dialog)
 game.initGameBoard()
+
