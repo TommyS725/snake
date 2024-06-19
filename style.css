@@ -215,18 +215,22 @@ dialog>div {
 
 dialog>div>div {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: space-evenly;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    @media screen and (min-width:450px){
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 dialog h1 {
-    line-height: 10px;
+    line-height: 2rem;
     text-align: center;
+    
 }
 
 dialog p {
     height: fit-content;
-    line-height: 3px;
+    line-height: 1.5rem;
 }
 
 dialog::backdrop {
