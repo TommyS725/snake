@@ -784,6 +784,3 @@ const dialog = document.querySelector('dialog')
 
 const game = new Game(main, m, n, btns, fields, dialog)
 game.initGameBoard()
-
-document.querySelector('button').onclick = () => game.dialog.open()
-
