@@ -164,6 +164,7 @@ class Snake {
             } catch (error) {
                 if (error instanceof EndGameError) {
                     this.game.end(error.reason);
+                    return;
                 }
                 console.error(error.message)
             }
