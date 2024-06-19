@@ -202,15 +202,19 @@ dialog {
     /* position: absolute; */
     /* top: 50%; */
     border-width: 7px;
-
+    max-width: 70vw;
+    max-height: 80vh;
 }
 
 
 dialog>div {
-    padding: 0px 40px 0px 40px;
+    padding: 0px 10px 0px 10px;
     border: unset;
     font-size: xx-large;
     font-weight: 700;
+    @media screen and (min-width:450px){
+        padding: 0px 40px 0px 40px;
+    }
 }
 
 dialog>div>div {
@@ -223,7 +227,7 @@ dialog>div>div {
 }
 
 dialog h1 {
-    line-height: 2rem;
+    line-height: 3rem;
     text-align: center;
     
 }
