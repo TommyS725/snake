@@ -292,9 +292,9 @@ class Difficulty {
     getSpeed() {
         switch (this.currentDifficulty) {
             case 'easy':
-                return 200
-            case 'normal':
                 return 100
+            case 'normal':
+                return 75
             case 'hard':
                 return 50
             default:
